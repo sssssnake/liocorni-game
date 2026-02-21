@@ -628,8 +628,17 @@ window.onYouTubeIframeAPIReady = function() {
   ytPlayer = new YT.Player('yt-player', {
     height: '1', width: '1',
     videoId: playlist[currentSong].id,
-    playerVars: { autoplay: 0, controls: 0, rel: 0, showinfo: 0, origin: window.location.origin },
+    playerVars: { autoplay: 0, controls: 0, rel: 0, showinfo: 0, disablekb: 1, origin: window.location.origin },
     events: {
+      onReady: (e) => {
+        // Prevent the hidden YouTube iframe from stealing keyboard focus
+        try {
+          const iframe = e.target.getIframe();
+          iframe.tabIndex = -1;
+          iframe.setAttribute('tabindex', '-1');
+          iframe.blur();
+        } catch (_) {}
+      },
       onStateChange: (e) => {
         if (e.data === YT.PlayerState.ENDED) advanceSong();
         if (e.data === YT.PlayerState.PLAYING) {
@@ -977,6 +986,20 @@ window.addEventListener('resize', () => {
   resizeParticleCanvas();
   resizeRainCanvas();
 });
+
+// ============================================================
+//  KEYBOARD FOCUS GUARD
+//  YouTube's hidden iframe can steal OS keyboard focus.
+//  Poll 4× per second; if an iframe holds focus, kick it back
+//  to the document so Stream Deck hotkeys always reach the game.
+// ============================================================
+document.body.tabIndex = 0;   // make body programmatically focusable
+setInterval(() => {
+  if (document.activeElement && document.activeElement.tagName === 'IFRAME') {
+    document.activeElement.blur();
+    document.body.focus({ preventScroll: true });
+  }
+}, 250);
 
 // ============================================================
 //  KEYBOARD SUPPORT (for Stream Deck hotkeys)
