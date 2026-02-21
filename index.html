@@ -1041,6 +1041,35 @@ window.addEventListener('keydown', (e) => {
   if (key === 'r' || key === 'R') { rainBtn.click();   return; }
 });
 
+// ============================================================
+//  STREAM DECK BRIDGE  (only active when served from localhost)
+//  The local server.py broadcasts SSE events; this listener
+//  picks them up and triggers animals/controls directly —
+//  no keyboard events, no focus, no OS permissions needed.
+// ============================================================
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+  function connectSSE() {
+    const src = new EventSource('/events');
+    src.onmessage = (e) => {
+      try {
+        const msg   = JSON.parse(e.data);
+        const cards = document.querySelectorAll('.animal-card');
+        if (msg.type === 'animal' && msg.idx < animals.length) {
+          onAnimalTap(cards[msg.idx], animals[msg.idx], msg.idx);
+        } else if (msg.type === 'music') {
+          musicBtn.click();
+        } else if (msg.type === 'skip') {
+          advanceSong();
+        } else if (msg.type === 'rain') {
+          rainBtn.click();
+        }
+      } catch (_) {}
+    };
+    src.onerror = () => { src.close(); setTimeout(connectSSE, 3000); };
+  }
+  connectSSE();
+}
+
 // Prevent zoom on iOS
 document.addEventListener('gesturestart', e => e.preventDefault());
 document.addEventListener('gesturechange', e => e.preventDefault());
