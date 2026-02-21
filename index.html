@@ -852,6 +852,38 @@ window.addEventListener('resize', () => {
   resizeRainCanvas();
 });
 
+// ============================================================
+//  KEYBOARD SUPPORT (for Stream Deck hotkeys)
+//  Keys 1-7: trigger animals, M: music, R: rain
+// ============================================================
+const animalCards = document.querySelectorAll('.animal-card');
+
+document.addEventListener('keydown', (e) => {
+  const key = e.key;
+
+  // Keys 1-7 trigger animals
+  const num = parseInt(key);
+  if (num >= 1 && num <= 7 && num <= animals.length) {
+    const idx = num - 1;
+    const card = animalCards[idx];
+    const animal = animals[idx];
+    onAnimalTap(card, animal, idx);
+    return;
+  }
+
+  // M toggles music
+  if (key === 'm' || key === 'M') {
+    musicBtn.click();
+    return;
+  }
+
+  // R toggles rain
+  if (key === 'r' || key === 'R') {
+    rainBtn.click();
+    return;
+  }
+});
+
 // Prevent zoom on iOS
 document.addEventListener('gesturestart', e => e.preventDefault());
 document.addEventListener('gesturechange', e => e.preventDefault());
