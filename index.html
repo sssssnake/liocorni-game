@@ -993,7 +993,20 @@ window.addEventListener('resize', () => {
 //  Poll 4× per second; if an iframe holds focus, kick it back
 //  to the document so Stream Deck hotkeys always reach the game.
 // ============================================================
-document.body.tabIndex = 0;   // make body programmatically focusable
+// ============================================================
+//  KEYBOARD FOCUS — grab focus on load and keep it
+// ============================================================
+document.body.tabIndex = 0;
+
+// Auto-focus as soon as the page is interactive
+document.body.focus({ preventScroll: true });
+
+// Re-focus whenever the user clicks anywhere on the page
+document.addEventListener('click', () => {
+  document.body.focus({ preventScroll: true });
+});
+
+// Kick focus away from the hidden YouTube iframe every 250 ms
 setInterval(() => {
   if (document.activeElement && document.activeElement.tagName === 'IFRAME') {
     document.activeElement.blur();
@@ -1002,32 +1015,30 @@ setInterval(() => {
 }, 250);
 
 // ============================================================
-//  KEYBOARD SUPPORT (for Stream Deck hotkeys)
-//  Keys 1-9: animals 1-9, 0: animal 10
-//  M: music toggle, N: next song, R: rain toggle
+//  KEYBOARD SUPPORT
+//  1-9  → animals 🦄🐱🐀🐘🐊🐧🐍🦁🐢
+//  0    → 🦜 parrot
+//  M    → music on/off
+//  N    → next song
+//  R    → rain on/off
 // ============================================================
-document.addEventListener('keydown', (e) => {
-  const key = e.key;
+window.addEventListener('keydown', (e) => {
+  // Ignore keystrokes while the user is typing in an input
+  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
 
-  // 1-9 = animals 1-9, 0 = animal 10
+  const key = e.key;
   const animalCards = document.querySelectorAll('.animal-card');
+
+  // 1-9 → animals 1-9,  0 → animal 10
   if (/^[0-9]$/.test(key)) {
     const idx = key === '0' ? 9 : parseInt(key) - 1;
-    if (idx < animals.length) {
-      const card = animalCards[idx];
-      onAnimalTap(card, animals[idx], idx);
-    }
+    if (idx < animals.length) onAnimalTap(animalCards[idx], animals[idx], idx);
     return;
   }
 
-  // M toggles music
-  if (key === 'm' || key === 'M') { musicBtn.click(); return; }
-
-  // N / → skips to next song
-  if (key === 'n' || key === 'N') { advanceSong(); return; }
-
-  // R toggles rain
-  if (key === 'r' || key === 'R') { rainBtn.click(); return; }
+  if (key === 'm' || key === 'M') { musicBtn.click();  return; }
+  if (key === 'n' || key === 'N') { advanceSong();     return; }
+  if (key === 'r' || key === 'R') { rainBtn.click();   return; }
 });
 
 // Prevent zoom on iOS
