@@ -129,7 +129,26 @@ canvas {
   to { box-shadow: 0 4px 30px rgba(77, 150, 255, 0.8); transform: scale(1.04); }
 }
 
+.btn-skip {
+  background: linear-gradient(135deg, #f7971e, #ffd200);
+  padding: 12px 18px;
+}
+
 .btn-icon { font-size: 1.3em; }
+
+/* === SONG LABEL === */
+.song-label {
+  text-align: center;
+  position: relative;
+  z-index: 10;
+  margin: -8px 0 8px;
+  font-size: clamp(12px, 2.5vw, 16px);
+  font-weight: 700;
+  color: rgba(0,0,0,0.45);
+  min-height: 1.4em;
+  transition: opacity 0.4s;
+}
+.song-label.hidden { opacity: 0; }
 
 /* === ANIMAL GRID === */
 .animal-grid {
@@ -172,7 +191,10 @@ canvas {
 .animal-card:nth-child(4) { animation-delay: 1.5s; }
 .animal-card:nth-child(5) { animation-delay: 2s; }
 .animal-card:nth-child(6) { animation-delay: 2.5s; }
-.animal-card:nth-child(7) { animation-delay: 3s; }
+.animal-card:nth-child(7)  { animation-delay: 3s; }
+.animal-card:nth-child(8)  { animation-delay: 3.5s; }
+.animal-card:nth-child(9)  { animation-delay: 4s; }
+.animal-card:nth-child(10) { animation-delay: 4.5s; }
 
 @keyframes idleWobble {
   0%, 100% { transform: rotate(0deg) scale(1); }
@@ -222,13 +244,16 @@ canvas {
   line-height: 1.2;
 }
 
-.animal-card:nth-child(1) .animal-name { color: #e04040; }
-.animal-card:nth-child(2) .animal-name { color: #e08e00; }
-.animal-card:nth-child(3) .animal-name { color: #6b7880; }
-.animal-card:nth-child(4) .animal-name { color: #45a049; }
-.animal-card:nth-child(5) .animal-name { color: #3a78d8; }
-.animal-card:nth-child(6) .animal-name { color: #e0527e; }
-.animal-card:nth-child(7) .animal-name { color: #a33dd4; }
+.animal-card:nth-child(1)  .animal-name { color: #c44dff; }
+.animal-card:nth-child(2)  .animal-name { color: #e08e00; }
+.animal-card:nth-child(3)  .animal-name { color: #c0392b; }
+.animal-card:nth-child(4)  .animal-name { color: #27ae60; }
+.animal-card:nth-child(5)  .animal-name { color: #16a085; }
+.animal-card:nth-child(6)  .animal-name { color: #2980b9; }
+.animal-card:nth-child(7)  .animal-name { color: #e67e22; }
+.animal-card:nth-child(8)  .animal-name { color: #d4a800; }
+.animal-card:nth-child(9)  .animal-name { color: #1abc9c; }
+.animal-card:nth-child(10) .animal-name { color: #27ae60; }
 
 .animal-card:hover {
   box-shadow: 0 8px 30px rgba(0,0,0,0.18), inset 0 2px 0 rgba(255,255,255,0.8);
@@ -282,14 +307,20 @@ canvas {
   <h1>L'Arca di Noè 🌈</h1>
 </div>
 
+<div id="yt-player" style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;"></div>
+
 <div class="controls">
   <button class="ctrl-btn btn-music" id="musicBtn" aria-label="Suona la musica">
     <span class="btn-icon">🎵</span> Musica
+  </button>
+  <button class="ctrl-btn btn-skip" id="skipBtn" aria-label="Canzone successiva" style="display:none;">
+    <span class="btn-icon">⏭️</span>
   </button>
   <button class="ctrl-btn btn-rain" id="rainBtn" aria-label="Attiva la pioggia">
     <span class="btn-icon">🌧️</span> Pioggia
   </button>
 </div>
+<div class="song-label hidden" id="songLabel">🎵</div>
 
 <div class="animal-grid" id="animalGrid"></div>
 
@@ -314,13 +345,16 @@ function getAudioCtx() {
 //  ANIMAL DATA
 // ============================================================
 const animals = [
-  { emoji: '🦄', name: 'Liocorni', sound: 'unicorn', bgHue: 290 },
-  { emoji: '🐱', name: 'Gatti',    sound: 'cat',     bgHue: 35  },
-  { emoji: '🐀', name: 'Ratti',    sound: 'rat',     bgHue: 0   },
-  { emoji: '🐘', name: 'Elefanti', sound: 'elephant', bgHue: 130 },
-  { emoji: '🐊', name: 'Coccodrilli', sound: 'croc', bgHue: 160 },
-  { emoji: '🐧', name: 'Pinguini', sound: 'penguin', bgHue: 210 },
-  { emoji: '🐍', name: 'Serpenti', sound: 'snake',   bgHue: 60  },
+  { emoji: '🦄', name: 'Liocorni',    sound: 'unicorn',  bgHue: 290 },
+  { emoji: '🐱', name: 'Gatti',       sound: 'cat',      bgHue: 35  },
+  { emoji: '🐀', name: 'Ratti',       sound: 'rat',      bgHue: 0   },
+  { emoji: '🐘', name: 'Elefanti',    sound: 'elephant', bgHue: 130 },
+  { emoji: '🐊', name: 'Coccodrilli', sound: 'croc',     bgHue: 160 },
+  { emoji: '🐧', name: 'Pinguini',    sound: 'penguin',  bgHue: 210 },
+  { emoji: '🐍', name: 'Serpenti',    sound: 'snake',    bgHue: 60  },
+  { emoji: '🦁', name: 'Leoni',       sound: 'lion',     bgHue: 25  },
+  { emoji: '🐢', name: 'Tartarughe',  sound: 'turtle',   bgHue: 170 },
+  { emoji: '🦜', name: 'Pappagalli',  sound: 'parrot',   bgHue: 45  },
 ];
 
 // ============================================================
@@ -494,108 +528,200 @@ function playAnimalSound(type) {
       noise.start(now); noise.stop(now + 0.55);
       break;
     }
-  }
-}
-
-// ============================================================
-//  MUSIC PLAYER - Original cheerful children's melody
-// ============================================================
-let musicPlaying = false;
-let musicTimeout = null;
-const musicBtn = document.getElementById('musicBtn');
-
-const melodyNotes = [
-  { note: 'C4', dur: 0.25 },
-  { note: 'E4', dur: 0.25 },
-  { note: 'G4', dur: 0.25 },
-  { note: 'C5', dur: 0.5 },
-  { note: 'B4', dur: 0.25 },
-  { note: 'A4', dur: 0.25 },
-  { note: 'G4', dur: 0.5 },
-  { note: 'R', dur: 0.25 },
-  { note: 'F4', dur: 0.25 },
-  { note: 'A4', dur: 0.25 },
-  { note: 'G4', dur: 0.25 },
-  { note: 'F4', dur: 0.25 },
-  { note: 'E4', dur: 0.5 },
-  { note: 'D4', dur: 0.25 },
-  { note: 'C4', dur: 0.5 },
-  { note: 'R', dur: 0.25 },
-  { note: 'G4', dur: 0.25 },
-  { note: 'A4', dur: 0.25 },
-  { note: 'B4', dur: 0.25 },
-  { note: 'C5', dur: 0.25 },
-  { note: 'D5', dur: 0.5 },
-  { note: 'C5', dur: 0.25 },
-  { note: 'B4', dur: 0.25 },
-  { note: 'A4', dur: 0.5 },
-  { note: 'R', dur: 0.25 },
-  { note: 'G4', dur: 0.25 },
-  { note: 'E4', dur: 0.25 },
-  { note: 'F4', dur: 0.25 },
-  { note: 'D4', dur: 0.25 },
-  { note: 'C4', dur: 0.75 },
-  { note: 'R', dur: 0.5 },
-];
-
-const noteFreqs = {
-  'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23,
-  'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
-  'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'R': 0
-};
-
-function playMelody() {
-  if (!musicPlaying) return;
-  const ctx = getAudioCtx();
-  const now = ctx.currentTime;
-  const tempo = 0.28;
-  let time = 0;
-
-  melodyNotes.forEach(n => {
-    if (n.note !== 'R') {
-      const freq = noteFreqs[n.note];
+    case 'lion': {
+      // Deep roar: low sawtooth sweep with harmonics
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const osc3 = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc1.type = 'sawtooth'; osc2.type = 'sawtooth'; osc3.type = 'square';
+      osc1.frequency.setValueAtTime(100, now); osc1.frequency.linearRampToValueAtTime(55, now + 0.8);
+      osc2.frequency.setValueAtTime(105, now); osc2.frequency.linearRampToValueAtTime(58, now + 0.8);
+      osc3.frequency.setValueAtTime(50,  now); osc3.frequency.linearRampToValueAtTime(30, now + 0.8);
+      gain.gain.setValueAtTime(0.0, now);
+      gain.gain.linearRampToValueAtTime(0.28, now + 0.1);
+      gain.gain.setValueAtTime(0.28, now + 0.5);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+      osc1.connect(gain); osc2.connect(gain); osc3.connect(gain);
+      gain.connect(ctx.destination);
+      osc1.start(now); osc1.stop(now + 0.95);
+      osc2.start(now); osc2.stop(now + 0.95);
+      osc3.start(now); osc3.stop(now + 0.95);
+      break;
+    }
+    case 'turtle': {
+      // Slow, deep, gentle hum
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq, now + time * tempo);
-      gain.gain.setValueAtTime(0.18, now + time * tempo);
-      gain.gain.setValueAtTime(0.18, now + (time + n.dur * 0.7) * tempo);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + (time + n.dur) * tempo);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(now + time * tempo);
-      osc.stop(now + (time + n.dur + 0.05) * tempo);
-
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(120, now);
+      osc.frequency.linearRampToValueAtTime(110, now + 0.6);
+      gain.gain.setValueAtTime(0.0, now);
+      gain.gain.linearRampToValueAtTime(0.18, now + 0.2);
+      gain.gain.setValueAtTime(0.18, now + 0.5);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+      // add gentle wobble via a second low-volume osc
       const osc2 = ctx.createOscillator();
       const gain2 = ctx.createGain();
       osc2.type = 'sine';
-      osc2.frequency.setValueAtTime(freq * 2, now + time * tempo);
-      gain2.gain.setValueAtTime(0.05, now + time * tempo);
-      gain2.gain.exponentialRampToValueAtTime(0.001, now + (time + n.dur) * tempo);
+      osc2.frequency.setValueAtTime(240, now);
+      gain2.gain.setValueAtTime(0.05, now);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+      osc.connect(gain).connect(ctx.destination);
       osc2.connect(gain2).connect(ctx.destination);
-      osc2.start(now + time * tempo);
-      osc2.stop(now + (time + n.dur + 0.05) * tempo);
+      osc.start(now); osc.stop(now + 0.95);
+      osc2.start(now); osc2.stop(now + 0.95);
+      break;
     }
-    time += n.dur;
-  });
+    case 'parrot': {
+      // Fast chirpy arpeggio
+      const notes = [1200, 1600, 1400, 1800, 1500, 2000];
+      notes.forEach((f, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(f, now + i * 0.06);
+        osc.frequency.linearRampToValueAtTime(f * 1.1, now + i * 0.06 + 0.03);
+        gain.gain.setValueAtTime(0.18, now + i * 0.06);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.07);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.06);
+        osc.stop(now + i * 0.06 + 0.1);
+      });
+      break;
+    }
+  }
+}
 
-  const totalDuration = melodyNotes.reduce((s, n) => s + n.dur, 0) * tempo * 1000;
-  musicTimeout = setTimeout(() => {
-    if (musicPlaying) playMelody();
-  }, totalDuration + 200);
+// ============================================================
+//  YOUTUBE JUKEBOX
+// ============================================================
+const playlist = [
+  { title: 'I Due Liocorni',         id: '8M6JrmIQiTc' },
+  { title: 'Il Coccodrillo Come Fa', id: 'mKAPO_nYV1o'  },
+  { title: 'Nella Vecchia Fattoria', id: '4HywQgnGxRI'  },
+  { title: 'Stella Stellina',        id: 'vrcf5kWXKZk'  },
+  { title: 'Ci Vuole Un Fiore',      id: 'mrd7CxDxyEE'  },
+];
+
+let currentSong = 0;
+let ytPlayer = null;
+let ytReady = false;
+let musicPlaying = false;
+let musicTimeout = null;
+
+const musicBtn  = document.getElementById('musicBtn');
+const skipBtn   = document.getElementById('skipBtn');
+const songLabel = document.getElementById('songLabel');
+
+// Load YouTube IFrame API
+(function loadYT() {
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  tag.onerror = () => { /* fallback below */ };
+  document.head.appendChild(tag);
+})();
+
+// Called by YouTube IFrame API when ready
+window.onYouTubeIframeAPIReady = function() {
+  ytReady = true;
+  ytPlayer = new YT.Player('yt-player', {
+    height: '1', width: '1',
+    videoId: playlist[currentSong].id,
+    playerVars: { autoplay: 0, controls: 0, rel: 0, showinfo: 0, origin: window.location.origin },
+    events: {
+      onStateChange: (e) => {
+        if (e.data === YT.PlayerState.ENDED) advanceSong();
+        if (e.data === YT.PlayerState.PLAYING) {
+          musicBtn.classList.add('playing');
+          musicBtn.querySelector('.btn-icon').textContent = '🔊';
+          musicPlaying = true;
+          skipBtn.style.display = 'flex';
+          showSongLabel();
+        }
+        if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.CUED) {
+          musicBtn.classList.remove('playing');
+          musicBtn.querySelector('.btn-icon').textContent = '🎵';
+          musicPlaying = false;
+        }
+      },
+      onError: () => advanceSong()
+    }
+  });
+};
+
+function showSongLabel() {
+  songLabel.textContent = '🎵 ' + playlist[currentSong].title;
+  songLabel.classList.remove('hidden');
+}
+
+function advanceSong() {
+  currentSong = (currentSong + 1) % playlist.length;
+  if (ytPlayer && ytReady) {
+    ytPlayer.loadVideoById(playlist[currentSong].id);
+    showSongLabel();
+  }
 }
 
 musicBtn.addEventListener('click', () => {
-  musicPlaying = !musicPlaying;
-  if (musicPlaying) {
-    musicBtn.classList.add('playing');
-    musicBtn.querySelector('.btn-icon').textContent = '🔊';
-    playMelody();
-  } else {
+  getAudioCtx(); // unlock audio context
+  if (!ytReady || !ytPlayer) {
+    // fallback: play synthesized melody if YouTube not available
+    musicPlaying = !musicPlaying;
+    if (musicPlaying) {
+      musicBtn.classList.add('playing');
+      musicBtn.querySelector('.btn-icon').textContent = '🔊';
+      playFallbackMelody();
+    } else {
+      musicBtn.classList.remove('playing');
+      musicBtn.querySelector('.btn-icon').textContent = '🎵';
+      clearTimeout(musicTimeout);
+    }
+    return;
+  }
+  const state = ytPlayer.getPlayerState();
+  if (state === YT.PlayerState.PLAYING) {
+    ytPlayer.pauseVideo();
+    musicPlaying = false;
     musicBtn.classList.remove('playing');
     musicBtn.querySelector('.btn-icon').textContent = '🎵';
-    clearTimeout(musicTimeout);
+  } else {
+    ytPlayer.loadVideoById(playlist[currentSong].id);
+    showSongLabel();
+    musicPlaying = true;
   }
 });
+
+skipBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  advanceSong();
+});
+
+// Simple synthesized melody fallback (no YouTube)
+const melodyNotes = [
+  {f:262,d:0.25},{f:330,d:0.25},{f:392,d:0.25},{f:523,d:0.5},
+  {f:494,d:0.25},{f:440,d:0.25},{f:392,d:0.5},{f:0,d:0.25},
+  {f:349,d:0.25},{f:440,d:0.25},{f:392,d:0.25},{f:349,d:0.25},
+  {f:330,d:0.5}, {f:294,d:0.25},{f:262,d:0.5}, {f:0,d:0.5},
+];
+function playFallbackMelody() {
+  if (!musicPlaying) return;
+  const ctx = getAudioCtx(); const now = ctx.currentTime;
+  let t = 0;
+  melodyNotes.forEach(n => {
+    if (n.f > 0) {
+      const osc = ctx.createOscillator(); const g = ctx.createGain();
+      osc.type = 'triangle'; osc.frequency.setValueAtTime(n.f, now + t);
+      g.gain.setValueAtTime(0.15, now + t);
+      g.gain.exponentialRampToValueAtTime(0.001, now + t + n.d);
+      osc.connect(g).connect(ctx.destination);
+      osc.start(now + t); osc.stop(now + t + n.d + 0.05);
+    }
+    t += n.d;
+  });
+  const total = melodyNotes.reduce((s, n) => s + n.d, 0) * 1000;
+  musicTimeout = setTimeout(() => { if (musicPlaying) playFallbackMelody(); }, total + 100);
+}
 
 // ============================================================
 //  RAIN TOGGLE
@@ -854,34 +980,31 @@ window.addEventListener('resize', () => {
 
 // ============================================================
 //  KEYBOARD SUPPORT (for Stream Deck hotkeys)
-//  Keys 1-7: trigger animals, M: music, R: rain
+//  Keys 1-9: animals 1-9, 0: animal 10
+//  M: music toggle, N: next song, R: rain toggle
 // ============================================================
-const animalCards = document.querySelectorAll('.animal-card');
-
 document.addEventListener('keydown', (e) => {
   const key = e.key;
 
-  // Keys 1-7 trigger animals
-  const num = parseInt(key);
-  if (num >= 1 && num <= 7 && num <= animals.length) {
-    const idx = num - 1;
-    const card = animalCards[idx];
-    const animal = animals[idx];
-    onAnimalTap(card, animal, idx);
+  // 1-9 = animals 1-9, 0 = animal 10
+  const animalCards = document.querySelectorAll('.animal-card');
+  if (/^[0-9]$/.test(key)) {
+    const idx = key === '0' ? 9 : parseInt(key) - 1;
+    if (idx < animals.length) {
+      const card = animalCards[idx];
+      onAnimalTap(card, animals[idx], idx);
+    }
     return;
   }
 
   // M toggles music
-  if (key === 'm' || key === 'M') {
-    musicBtn.click();
-    return;
-  }
+  if (key === 'm' || key === 'M') { musicBtn.click(); return; }
+
+  // N / → skips to next song
+  if (key === 'n' || key === 'N') { advanceSong(); return; }
 
   // R toggles rain
-  if (key === 'r' || key === 'R') {
-    rainBtn.click();
-    return;
-  }
+  if (key === 'r' || key === 'R') { rainBtn.click(); return; }
 });
 
 // Prevent zoom on iOS
